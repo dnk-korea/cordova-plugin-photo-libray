@@ -1,6 +1,6 @@
 {
-  "name": "cordova-plugin-photo-library",
-  "version": "2.1.1",
+  "name": "cordova-plugin-photo-library-duplicate",
+  "version": "2.1.2",
   "description": "Plugin that just gets photos from the gallery",
   "main": "index.js",
   "scripts": {
@@ -12,18 +12,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/terikon/cordova-plugin-photo-library.git"
+    "url": "git+https://github.com/dnk-korea/cordova-plugin-photo-libray-duplicate.git"
   },
-  "author": {
+  "author": [{
     "name": "Roman Viskin",
     "email": "npm@terikon.com",
     "url": "http://il.linkedin.com/in/romanviskin"
-  },
+  },{
+    "name": "bhong",
+    "email":"bhong@dnkecommerce.com"
+  }],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/terikon/cordova-plugin-photo-library/issues"
+    "url": "https://github.com/dnk-korea/cordova-plugin-photo-libray-duplicate/issues"
   },
-  "homepage": "https://github.com/terikon/cordova-plugin-photo-library#readme",
+  "homepage": "https://github.com/dnk-korea/cordova-plugin-photo-libray-duplicate#readme",
   "devDependencies": {
     "eslint": "^3.14.1",
     "@types/cordova": "^0.0.34",
