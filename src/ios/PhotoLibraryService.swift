@@ -160,6 +160,7 @@ final class PhotoLibraryService {
             self.getCompleteInfo(libraryItem, completion: { (fullPath) in
                 
                 libraryItem["filePath"] = fullPath
+                libraryItem["url"] = fullPath
             
                 if index == fetchResult.count - 1 { // Last item
                     completion(chunk, chunkNum, true)
@@ -293,10 +294,22 @@ final class PhotoLibraryService {
                 
                 let albumItem = NSMutableDictionary()
                 
-                albumItem["id"] = assetCollection.localIdentifier
+                albumItem["bid"] = assetCollection.localIdentifier
                 albumItem["title"] = assetCollection.localizedTitle
                 
-                result.append(albumItem)
+                let assetsFetchResult: PHFetchResult = PHAsset.fetchAssets(in: assetCollection, options: nil)
+                let albumCount = assetsFetchResult.count
+                albumItem["cnt"] = albumCount;
+                
+                self.getThumbnailWithIdentifer(AlbumsResult: assetCollection) { (photoId, photoURL, thumbnailURL) in
+                    albumItem["id"] = photoId
+                    albumItem["photoURL"] = photoURL
+                    albumItem["thumbnailURL"] = thumbnailURL
+                }
+                
+                if albumCount > 0 {
+                    result.append(albumItem)
+                }
                 
             });
             
@@ -304,6 +317,30 @@ final class PhotoLibraryService {
         
         return result;
         
+    }
+    
+    func getThumbnailWithIdentifer(AlbumsResult:PHAssetCollection, completion: @escaping (_ photoId: String?, _ photoURL: String?, _ thumbnailURL: String?) -> Void) {
+        
+        // 앨범 타이틀을 이용해 특정 앨범의 사진들을 가져온다
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+        
+        let assetsFetchResult: PHFetchResult = PHAsset.fetchAssets(in: AlbumsResult, options: fetchOptions)
+        if assetsFetchResult.count > 0 {
+            
+            // 가져온 사진중 마지막 사진을 선택하고
+            if let imageAsset = assetsFetchResult.lastObject {
+                
+                completion(imageAsset.localIdentifier,
+                           "cdvphotolibrary://photo?photoId="+imageAsset.localIdentifier,
+                           "cdvphotolibrary://thumbnail?photoId="+imageAsset.localIdentifier+"&width=200&height=200&quality=0.1");
+                
+            } else {
+                completion("", "", "")
+            }
+        } else {
+            completion("", "", "")
+        }
     }
     
     func getThumbnail(_ photoId: String, thumbnailWidth: Int, thumbnailHeight: Int, quality: Float, completion: @escaping (_ result: PictureData?) -> Void) {
