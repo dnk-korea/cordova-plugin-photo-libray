@@ -62,6 +62,7 @@ public class PhotoLibrary extends CordovaPlugin {
               final int itemsInChunk = options.getInt("itemsInChunk");
               final double chunkTimeSec = options.getDouble("chunkTimeSec");
               final boolean includeAlbumData = options.getBoolean("includeAlbumData");
+              final String albumId = options.getString("albumId");
 
               if (!cordova.hasPermission(READ_EXTERNAL_STORAGE)) {
                 callbackContext.error(service.PERMISSION_ERROR);
@@ -70,7 +71,7 @@ public class PhotoLibrary extends CordovaPlugin {
 
               PhotoLibraryGetLibraryOptions getLibraryOptions = new PhotoLibraryGetLibraryOptions(itemsInChunk, chunkTimeSec, includeAlbumData);
 
-              service.getLibrary(getContext(), getLibraryOptions, new PhotoLibraryService.ChunkResultRunnable() {
+              service.getLibrary(getContext(), getLibraryOptions,albumId, new PhotoLibraryService.ChunkResultRunnable() {
                 @Override
                 public void run(ArrayList<JSONObject> library, int chunkNum, boolean isLastChunk) {
                   try {
