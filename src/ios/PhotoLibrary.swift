@@ -32,7 +32,7 @@ import Foundation
 
             let options = command.arguments[0] as! NSDictionary
             
-            
+            let albumId = options["albumId"] as! String
             let thumbnailWidth = options["thumbnailWidth"] as! Int
             let thumbnailHeight = options["thumbnailHeight"] as! Int
             let itemsInChunk = options["itemsInChunk"] as! Int
@@ -60,7 +60,8 @@ import Foundation
                                                                   includeImages: includeImages,
                                                                   includeAlbumData: includeAlbumData,
                                                                   includeCloudData: includeCloudData,
-                                                                  includeVideos: includeVideos)
+                                                                  includeVideos: includeVideos,
+                                                                  albumId: albumId)
 
             service.getLibrary(getLibraryOptions,
                 completion: { (library, chunkNum, isLastChunk) in

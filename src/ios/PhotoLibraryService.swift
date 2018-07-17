@@ -129,9 +129,22 @@ final class PhotoLibraryService {
                                                      PHAssetMediaType.video.rawValue)
             }
         }
-        
-        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
 
+        var fetchCollection = PHFetchResult<PHAssetCollection>()
+        var fetchResult = PHFetchResult<PHAsset>()
+        
+        if (options.albumId != "")
+        {
+            fetchCollection = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [options.albumId], options: nil)
+        
+            fetchCollection.enumerateObjects({ (asset: PHAssetCollection, index, stop) in
+                fetchResult = PHAsset.fetchAssets(in: asset, options: self.fetchOptions)
+            })
+        }
+        else
+        {
+            fetchResult = PHAsset.fetchAssets(with: fetchOptions)
+        }
 
         
 	// TODO: do not restart caching on multiple calls
