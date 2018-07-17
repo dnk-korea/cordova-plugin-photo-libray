@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 
 import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
@@ -63,9 +64,13 @@ public class PhotoLibraryService {
     return instance;
   }
 
-  public void getLibrary(Context context, PhotoLibraryGetLibraryOptions options, ChunkResultRunnable completion) throws JSONException {
+  public void getLibrary(Context context, PhotoLibraryGetLibraryOptions options,String albumId, ChunkResultRunnable completion) throws JSONException {
 
     String whereClause = "";
+    if(!"".equals(albumId)) {
+      whereClause = "BUCKET_ID = \"" + albumId + "\"";
+      Log.d("xxxxx",whereClause);
+    }
     queryLibrary(context, options.itemsInChunk, options.chunkTimeSec, options.includeAlbumData, whereClause, completion);
 
   }
@@ -75,13 +80,23 @@ public class PhotoLibraryService {
     // All columns here: https://developer.android.com/reference/android/provider/MediaStore.Images.ImageColumns.html,
     // https://developer.android.com/reference/android/provider/MediaStore.MediaColumns.html
     JSONObject columns = new JSONObject() {{
-      put("id", MediaStore.Images.ImageColumns.BUCKET_ID);
+      put("bid", MediaStore.Images.ImageColumns.BUCKET_ID);
       put("title", MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
+      put("cnt", "count(1)");
+      put("int.id", "max("+MediaStore.Images.Media._ID+")");
+      put("nativeURL", MediaStore.MediaColumns.DATA); // will not be returned to javascript
     }};
 
-    final ArrayList<JSONObject> queryResult = queryContentProvider(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, "1) GROUP BY 1,(2");
+    final ArrayList<JSONObject> queryResults = queryContentProvider(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, "1) GROUP BY BUCKET_ID,(2");
+    for (int i=0; i<queryResults.size(); i++) {
+      JSONObject queryResult = queryResults.get(i);
+      queryResult.put("id", queryResult.get("id") + ";" + queryResult.get("nativeURL"));
+      queryResult.remove("nativeURL"); // Not needed
+    }
 
-    return queryResult;
+
+
+    return queryResults;
 
   }
 
@@ -321,13 +336,17 @@ public class PhotoLibraryService {
 
   }
 
-  private void queryLibrary(Context context, String whereClause, ChunkResultRunnable completion) throws JSONException {
+  private void queryLibrary(Context context, String albumId, ChunkResultRunnable completion) throws JSONException {
+    String whereClause = "";
+    if(!"".equals(albumId)) {
+      whereClause = "BUCKET_ID = \"" + albumId + "\"";
+    }
     queryLibrary(context, 0, 0, false, whereClause, completion);
   }
 
   private void queryLibrary(Context context, int itemsInChunk, double chunkTimeSec, boolean includeAlbumData, String whereClause, ChunkResultRunnable completion)
     throws JSONException {
-
+    Log.d("xxx",String.valueOf(itemsInChunk));
     // All columns here: https://developer.android.com/reference/android/provider/MediaStore.Images.ImageColumns.html,
     // https://developer.android.com/reference/android/provider/MediaStore.MediaColumns.html
     JSONObject columns = new JSONObject() {{
@@ -340,9 +359,10 @@ public class PhotoLibraryService {
       put("float.latitude", MediaStore.Images.ImageColumns.LATITUDE);
       put("float.longitude", MediaStore.Images.ImageColumns.LONGITUDE);
       put("nativeURL", MediaStore.MediaColumns.DATA); // will not be returned to javascript
+      put("url", MediaStore.MediaColumns.DATA);
     }};
 
-    final ArrayList<JSONObject> queryResults = queryContentProvider(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, whereClause);
+    final ArrayList<JSONObject> queryResults = queryContentProvider(context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,whereClause);
 
     ArrayList<JSONObject> chunk = new ArrayList<JSONObject>();
 
