@@ -403,5 +403,3 @@ function fixedEncodeURIComponent(str) {
     return '%' + c.charCodeAt(0).toString(16);
   });
 }
-
-});
